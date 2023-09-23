@@ -28,9 +28,6 @@ def signal():
     temp = input("\033[1;34m输入任意键继续\033[0m")
 
 
-0
-
-
 def print_separator(func):
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
@@ -116,21 +113,25 @@ def compare_mac(mac, mac_verif):
 
 
 def decrypt(encrypted_data, iv_bytes, signature, shared_key, hmac_key):
-    if not compare_mac(hmac.new(hmac_key, encrypted_data, digestmod="sha256").digest()[0:16], signature):
+    if not compare_mac(
+            hmac.new(hmac_key, encrypted_data, digestmod="sha256").digest()[:16],
+            signature,
+    ):
         print("message authentication failed")
         return
 
     cypher = AES.new(shared_key, AES.MODE_CBC, iv_bytes)
-    data = cypher.decrypt(encrypted_data)
-    return data
+    return cypher.decrypt(encrypted_data)
 
 
 @print_separator
 def CS_decode(SHARED_KEY, HMAC_KEY, encrypt_data):
-    encrypt_data_length = int.from_bytes(encrypt_data[0:4], byteorder='big', signed=False)
-    encrypt_data_l = encrypt_data[4:len(encrypt_data)]
+    encrypt_data_length = int.from_bytes(
+        encrypt_data[:4], byteorder='big', signed=False
+    )
+    encrypt_data_l = encrypt_data[4:]
 
-    data1 = encrypt_data_l[0:encrypt_data_length - 16]
+    data1 = encrypt_data_l[:encrypt_data_length - 16]
     signature = encrypt_data_l[encrypt_data_length - 16:encrypt_data_length]
     iv_bytes = bytes("abcdefghijklmnop", 'utf-8')
 
